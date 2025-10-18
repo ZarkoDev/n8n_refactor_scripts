@@ -29,3 +29,8 @@ Route::middleware('guest')->group(function (): void {
         return view('auth.register');
     })->name('register');
 });
+
+// Protected routes (authentication handled in frontend)
+Route::get('/tasks', function () {
+    return view('tasks.index');
+});

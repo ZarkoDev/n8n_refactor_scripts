@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Api\V1\AdScriptTaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,5 +25,9 @@ Route::prefix('auth')->group(function (): void {
 
 // SignedIn API routes
 Route::middleware('auth:sanctum')->group(function (): void {
-
+    // Ad Script Tasks API (v1) routes
+        Route::prefix('ad-scripts')->group(function (): void {
+            Route::resource('/', AdScriptTaskController::class);
+        });
 });
+

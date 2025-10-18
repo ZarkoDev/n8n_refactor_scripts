@@ -40,6 +40,20 @@ services:
       timeout: 5s
       retries: 30
 
+
+  vite:
+      build:
+          context: .
+          dockerfile: docker/vite/Dockerfile
+      container_name: laravel-vite
+      ports:
+          - "5173:5173"
+      volumes:
+          - ./:/var/www/html
+          - /var/www/html/node_modules
+      networks:
+          - appnet
+
 volumes:
   dbdata:
 

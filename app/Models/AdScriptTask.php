@@ -9,10 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class AdScriptTask extends Model
 {
-    use HasFactory;
-
-    protected $table = 'ad_script_tasks';
-
     protected $fillable = [
         'reference_script',
         'outcome_description',
