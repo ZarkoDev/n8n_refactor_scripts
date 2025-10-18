@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  laravel-app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: laravel-php-fpm:8.3
+    container_name: laravel-app
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "127.0.0.1:8000:8000"
+    working_dir: /var/www/html
+    # Run with host UID/GID to avoid permission issues on bind mounts
+    user: "${UID:-1000}:${GID:-1000}"
+    # Use startup script for database setup and server start
+    command: /var/www/html/docker/php/startup.sh
+    networks:
+      - appnet
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - appnet
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  dbdata:
+
+
+networks:
+  appnet:
+    driver: bridge
+
+
