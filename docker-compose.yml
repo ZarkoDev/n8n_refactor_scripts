@@ -23,6 +23,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+          condition: service_healthy
 
 
   db:
@@ -54,8 +56,47 @@ services:
       networks:
           - appnet
 
+
+  redis:
+      image: redis:7-alpine
+      container_name: laravel-redis
+      ports:
+          - "6380:6379"
+      volumes:
+          - redis_data:/data
+      networks:
+          - appnet
+      healthcheck:
+          test: ["CMD", "redis-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 5
+
+
+  soketi:
+      image: quay.io/soketi/soketi:1.2-16-alpine
+      container_name: laravel-soketi
+      ports:
+          - "127.0.0.1:6001:6001"
+      networks:
+          - appnet
+
+
+  n8n:
+      image: n8nio/n8n:latest
+      container_name: laravel-n8n
+      ports:
+          - "5678:5678"
+      volumes:
+          - n8n_data:/home/node/.n8n
+      networks:
+          - appnet
+
+
 volumes:
   dbdata:
+  redis_data:
+  n8n_data:
 
 
 networks:

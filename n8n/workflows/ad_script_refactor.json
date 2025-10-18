@@ -1,0 +1,182 @@
+{
+    "name": "Ad Script Refactor POC",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "ad-script-refactor",
+                "options": {}
+            },
+            "id": "ee616b43-a06e-47fb-8510-f03f799a21b0",
+            "name": "Webhook1",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                -624,
+                80
+            ],
+            "webhookId": "9826593a-3c02-4022-814b-13956c0ed3f4"
+        },
+        {
+            "parameters": {
+                "modelId": {
+                    "__rl": true,
+                    "value": "models/gemini-2.5-flash-lite-preview-06-17",
+                    "mode": "list",
+                    "cachedResultName": "models/gemini-2.5-flash-lite-preview-06-17"
+                },
+                "messages": {
+                    "values": [
+                        {
+                            "content": "=Analyse this script \"{{ $('Webhook1').item.json.body.reference_script }}\". Then refactor it based on this outcome \"{{ $('Webhook1').item.json.body.outcome_description }}\". Return me the new script in field `new_script` and the analyse in field `analysis`."
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.googleGemini",
+            "typeVersion": 1,
+            "position": [
+                -416,
+                80
+            ],
+            "id": "9be75b8b-b1cd-44d1-9686-fc091cb87baf",
+            "name": "Message a model",
+            "retryOnFail": true,
+            "waitBetweenTries": 2000,
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "E5yKyfRv8td585ms",
+                    "name": "Google Gemini(PaLM) Api account"
+                }
+            },
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "=http://laravel-app:8000/api/ad-scripts/{{ $('Webhook1').item.json.body.task_id }}/failed",
+                "authentication": "predefinedCredentialType",
+                "nodeCredentialType": "httpBearerAuth",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "task_id",
+                            "value": "={{ $('Webhook1').item.json.body.task_id }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                208,
+                96
+            ],
+            "id": "4f193e6f-0dd8-42f1-82ec-5bff9341a1c1",
+            "name": "Failed Response",
+            "credentials": {
+                "httpBearerAuth": {
+                    "id": "ZRBKdkYIZ0pKuyWR",
+                    "name": "Bearer Auth account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "=http://laravel-app:8000/api/ad-scripts/{{ $('Webhook1').item.json.body.task_id }}/result",
+                "authentication": "predefinedCredentialType",
+                "nodeCredentialType": "httpBearerAuth",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "task_id",
+                            "value": "={{ $('Webhook1').item.json.body.task_id }}"
+                        },
+                        {
+                            "name": "response",
+                            "value": "={{ $json.content.parts[0].text }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                0,
+                0
+            ],
+            "id": "79688e6b-0ca6-4187-920b-023c944f9881",
+            "name": "Return Response",
+            "retryOnFail": true,
+            "waitBetweenTries": 2000,
+            "credentials": {
+                "httpBearerAuth": {
+                    "id": "ZRBKdkYIZ0pKuyWR",
+                    "name": "Bearer Auth account"
+                }
+            },
+            "onError": "continueErrorOutput"
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Webhook1": {
+            "main": [
+                [
+                    {
+                        "node": "Message a model",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Message a model": {
+            "main": [
+                [
+                    {
+                        "node": "Return Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Failed Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Return Response": {
+            "main": [
+                [],
+                [
+                    {
+                        "node": "Failed Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "versionId": "e089072c-d319-4ec9-9ea6-2a0e4837b14d",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "6cf8d5dade9e6f5d14f019d7f7a6067514209a49d5fda33136450205c0f06b6b"
+    },
+    "id": "YMbnYHjPuv1hguxz",
+    "tags": []
+}

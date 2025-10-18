@@ -100,7 +100,7 @@
                 <th class="border p-2 text-left">Status</th>
                 <th class="border p-2 text-left">Reference</th>
                 <th class="border p-2 text-left">Outcome</th>
-                <th class="border p-2 text-left">Updated</th>
+                <th class="border p-2 text-left">Refactored</th>
                 <th class="border p-2 text-left">Actions</th>
             </tr>
         </thead>
@@ -121,7 +121,7 @@
                     </td>
                     <td class="border p-2">{{ Str::limit($task->reference_script, 80) }}</td>
                     <td class="border p-2">{{ Str::limit($task->outcome_description, 80) }}</td>
-                    <td class="border p-2">{{ $task->updated_at }}</td>
+                    <td class="border p-2">{{ $task->new_script }}</td>
                     <td class="border p-2">
                         <div class="flex gap-2">
                             <button
@@ -134,6 +134,13 @@
                                 class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded transition-colors duration-150"
                                 title="View Details"
                             >DELETE</button>
+                            @if($task->status === 'failed')
+                                <button
+                                    wire:click="retryTask({{ $task->id }})"
+                                    class="text-orange-600 hover:text-orange-800 hover:bg-orange-50 p-2 rounded transition-colors duration-150"
+                                    title="Retry Task"
+                                >RETRY</button>
+                            @endif
                         </div>
                     </td>
                 </tr>

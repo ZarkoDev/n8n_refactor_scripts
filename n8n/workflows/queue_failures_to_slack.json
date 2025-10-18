@@ -1,0 +1,166 @@
+{
+    "name": "Queue Failures to Slack",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "queue-failures",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "8ac15754-463c-4025-9fb6-d14dceec01e7",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                -448,
+                112
+            ],
+            "webhookId": "queue-failures"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 1
+                    },
+                    "conditions": [
+                        {
+                            "id": "condition-1",
+                            "leftValue": "={{ $json.body.payload.displayName }}",
+                            "rightValue": "App\\Jobs\\DispatchAdScriptTaskToN8nJob",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "id": "8cd76e74-fed3-4713-918c-dc502bfbc07b",
+            "name": "Filter Ad Script Jobs",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                -224,
+                112
+            ]
+        },
+        {
+            "parameters": {
+                "select": "user",
+                "user": {
+                    "__rl": true,
+                    "value": "12345",
+                    "mode": "id"
+                },
+                "text": "queue failed",
+                "otherOptions": {}
+            },
+            "id": "de4fe20d-0fe5-47ef-89a7-b102d93bbaf1",
+            "name": "Format Slack Message",
+            "type": "n8n-nodes-base.slack",
+            "typeVersion": 2.1,
+            "position": [
+                0,
+                0
+            ],
+            "webhookId": "63bad674-855f-4bec-b7b7-c9fd6665082d",
+            "credentials": {
+                "slackApi": {
+                    "id": "b245SFHSxAT8eNmv",
+                    "name": "Slack account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"Notification sent to Slack\"\n}",
+                "options": {}
+            },
+            "id": "7bd61039-0e30-4fdd-9d03-5d80e6535fd1",
+            "name": "Success Response",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                224,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "{\n  \"status\": \"ignored\",\n  \"message\": \"Job type not relevant for Slack notification\"\n}",
+                "options": {}
+            },
+            "id": "a94e688b-4e3d-47f5-b453-b5718e7fd29b",
+            "name": "Ignored Response",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                224,
+                208
+            ]
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Filter Ad Script Jobs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filter Ad Script Jobs": {
+            "main": [
+                [
+                    {
+                        "node": "Format Slack Message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Ignored Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Slack Message": {
+            "main": [
+                [
+                    {
+                        "node": "Success Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "versionId": "7828dce4-778b-4d37-85c2-bbb502ff6aeb",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "6cf8d5dade9e6f5d14f019d7f7a6067514209a49d5fda33136450205c0f06b6b"
+    },
+    "id": "uFsETTNBDYn3BM4w",
+    "tags": []
+}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Contracts\Repositories\AdScriptTaskRepositoryContract;
+use App\Events\TaskStatusChanged;
 use App\Models\AdScriptTask;
 
 class EloquentAdScriptTaskRepository implements AdScriptTaskRepositoryContract
@@ -45,6 +46,22 @@ class EloquentAdScriptTaskRepository implements AdScriptTaskRepositoryContract
             'error' => $error,
         ])->save();
         $task->refresh();
+
+        return $task;
+    }
+
+    public function retryTask(int $id): AdScriptTask
+    {
+        $task = AdScriptTask::query()->findOrFail($id);
+        $task->fill([
+            'status' => 'pending',
+            'error' => null,
+        ])->save();
+
+        $task->refresh();
+
+        // Broadcast status change event
+        broadcast(new TaskStatusChanged($task));
 
         return $task;
     }

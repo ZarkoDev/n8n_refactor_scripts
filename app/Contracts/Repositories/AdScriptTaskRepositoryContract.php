@@ -44,6 +44,14 @@ interface AdScriptTaskRepositoryContract
      */
     public function markFailed(int $id, string $error): AdScriptTask;
 
+    /**
+     * Retry failed task
+     *
+     * @param int $id
+     * @return AdScriptTask
+     */
+    public function retryTask(int $id): AdScriptTask;
+
 }
 
 

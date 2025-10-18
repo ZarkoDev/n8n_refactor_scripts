@@ -14,12 +14,15 @@ RUN apk add --no-cache \
         icu icu-dev \
         zlib zlib-dev \
         shadow \
+    && apk add --no-cache autoconf \
     && docker-php-ext-configure gd \
         --with-freetype \
         --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         pdo pdo_mysql zip gd intl mbstring opcache \
-    && apk del --no-network freetype-dev libpng-dev libjpeg-turbo-dev icu-dev zlib-dev oniguruma-dev
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del --no-network freetype-dev libpng-dev libjpeg-turbo-dev icu-dev zlib-dev oniguruma-dev autoconf
 
 # Composer
 ENV COMPOSER_ALLOW_SUPERUSER=1 \

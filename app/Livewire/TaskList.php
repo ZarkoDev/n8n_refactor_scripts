@@ -36,15 +36,29 @@ class TaskList extends Component
     public ?object $selectedTask = null;
     public bool $showTaskDetails = false;
 
-    /**
-     * Render fetched tasks
-     */
     public function render()
     {
         $tasks = $this->fetchTasks();
         return view('livewire.task-list', [
             'tasks' => $tasks,
         ]);
+    }
+
+    public function getListeners(): array
+    {
+        return [
+            "echo:tasks,task.status.changed" => "refreshTasks",
+        ];
+    }
+
+    #[On('echo:tasks,task.status.changed')]
+    public function refreshTasks(): void
+    {
+        // Log that we received the broadcast
+        info('Livewire received broadcast event, refreshing tasks');
+
+        // Force a complete refresh of the component
+        $this->dispatch('$refresh');
     }
 
     /**
@@ -76,6 +90,9 @@ class TaskList extends Component
                 $this->reference_script,
                 $this->outcome_description
             );
+
+            // Dispatch the job to send to n8n
+            DispatchAdScriptTaskToN8nJob::dispatch($task->id);
 
             $this->successMessage = 'Task created successfully!';
             $this->resetForm();
@@ -142,6 +159,33 @@ class TaskList extends Component
     {
         $this->showTaskDetails = false;
         $this->selectedTask = null;
+    }
+
+    /**
+     * Retry failed task
+     *
+     * @param int $taskId
+     */
+    public function retryTask(int $taskId): void
+    {
+        $this->clearMessages();
+
+        try {
+            $repository = app(AdScriptTaskRepositoryContract::class);
+
+            // Reset the task to pending status
+            $task = $repository->retryTask($taskId);
+
+            // Dispatch the job to send to n8n again
+            DispatchAdScriptTaskToN8nJob::dispatch($task->id);
+
+            $this->successMessage = 'Task retry initiated successfully!';
+
+            // Refresh the task list
+            $this->dispatch('$refresh');
+        } catch (\Exception $e) {
+            $this->errorMessage = 'Error retrying task: ' . $e->getMessage();
+        }
     }
 
     /**
