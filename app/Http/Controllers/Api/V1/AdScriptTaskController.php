@@ -122,16 +122,13 @@ class AdScriptTaskController extends Controller
             $json = ltrim(trim($response, '`'), 'json');
             $parsed = json_decode($json, true);
 
-            if (!Arr::has($parsed, ['new_script', 'analysis'])) {
-                return response()->json(['message' => 'Invalid fields in the response'], 422);
-            }
-
             $updated = $repository->markCompleted(
                 $id,
                 $parsed['new_script'],
                 $parsed['analysis']
             );
         } catch (\Throwable $e) {
+            // Throw error if json is invalid and mark as failed
             $updated = $repository->markFailed($id, $e->getMessage());
         }
 

@@ -16,8 +16,8 @@ class StoreAdScriptTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reference_script' => ['required', 'string', 'min:1'],
-            'outcome_description' => ['required', 'string', 'min:1'],
+            'reference_script' => ['required', 'string', 'min:10'],
+            'outcome_description' => ['required', 'string', 'min:10'],
         ];
     }
 }

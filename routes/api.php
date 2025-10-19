@@ -28,12 +28,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
     // Ad Script Tasks API (v1) routes
     Route::prefix('ad-scripts')->group(function (): void {
         Route::resource('/', AdScriptTaskController::class);
-
-        // Webhooks
-//        Route::middleware('n8n.callback')->group(function (): void {
-//            Route::post('{id}/result', [AdScriptTaskController::class, 'result']);
-//            Route::post('{id}/failed', [AdScriptTaskController::class, 'failed']);
-//        });
     });
 });
 
