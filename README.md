@@ -33,3 +33,7 @@ https://www.mermaidchart.com/d/1c47d38b-07ce-41bc-bd34-eac03639a09c
 docker-compose exec laravel-app php artisan queue:work
 
 Create ad-script
+
+## Postman collection
+
+You can find postman collection in `postman` folder.
